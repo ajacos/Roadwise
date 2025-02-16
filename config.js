@@ -1,6 +1,6 @@
-export const API_URL = "http://ajserber.duckdns.org:5000/api"
+export const BASE_URL = "http://ajserber.duckdns.org:5000"
+export const API_URL = `${BASE_URL}/api`
 
-// If you're testing locally, use this instead:
-// export const API_URL = "http://10.0.2.2:5000/api"  // for Android emulator
-// export const API_URL = "http://localhost:5000/api"  // for iOS simulator or web
+console.log("BASE_URL:", BASE_URL)
+console.log("API_URL:", API_URL)
 
