@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { View, StyleSheet, Alert, ScrollView, TouchableOpacity, Dimensions, Animated } from "react-native"
+import { View, StyleSheet, Alert, ScrollView, TouchableOpacity, Dimensions, Animated, Image } from "react-native"
 import { Text, Button, FAB, Portal, Dialog, TextInput, Menu, ActivityIndicator } from "react-native-paper"
 import MapView, { Marker } from "react-native-maps"
 import * as Location from "expo-location"
@@ -11,6 +11,7 @@ import colors from "../utils/colors"
 import { LinearGradient } from "expo-linear-gradient"
 import io from "socket.io-client"
 import { API_URL } from "../config"
+import { BASE_URL } from "../config"
 
 const { width, height } = Dimensions.get("window")
 const ASPECT_RATIO = width / height
@@ -194,6 +195,14 @@ const HazardsScreen = ({ navigation }) => {
           <View style={styles.hazardPopupInfo}>
             <Text style={styles.hazardPopupType}>{selectedHazard.type}</Text>
             <Text style={styles.hazardPopupDescription}>{selectedHazard.description}</Text>
+            <Text style={styles.hazardPopupAddress}>{selectedHazard.address}</Text>
+            <View style={styles.reportedByContainer}>
+              <Image
+                source={{ uri: `${BASE_URL}${selectedHazard.reportedBy.profilePicture}` }}
+                style={styles.reporterProfilePic}
+              />
+              <Text style={styles.reportedByText}>Reported by: {selectedHazard.reportedBy.username}</Text>
+            </View>
           </View>
         </View>
         <Button mode="contained" onPress={() => setSelectedHazard(null)} style={styles.closePopupButton}>
@@ -274,16 +283,15 @@ const HazardsScreen = ({ navigation }) => {
                     selectedHazard && selectedHazard._id === hazard._id && styles.selectedHazard,
                   ]}
                 >
-                  <Ionicons
-                    name={hazardTypes.find((t) => t.value === hazard.type)?.icon || "alert-circle"}
-                    size={24}
-                    color={colors.primary}
-                    style={styles.hazardIcon}
+                  <Image
+                    source={{ uri: `${BASE_URL}${hazard.reportedBy.profilePicture}` }}
+                    style={styles.reporterProfilePic}
                   />
                   <View style={styles.hazardInfo}>
                     <Text style={styles.hazardType}>{hazard.type}</Text>
-                    <Text style={styles.hazardDescription} numberOfLines={2}>
-                      {hazard.description}
+                    <Text style={styles.hazardDescription}>{hazard.description}</Text>
+                    <Text style={styles.hazardAddress} numberOfLines={2}>
+                      {hazard.address}
                     </Text>
                   </View>
                 </View>
@@ -420,6 +428,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textLight,
   },
+  hazardAddress: {
+    fontSize: 12,
+    color: colors.textLight,
+  },
   fab: {
     position: "absolute",
     margin: 16,
@@ -520,6 +532,25 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   hazardPopupDescription: {
+    fontSize: 14,
+    color: colors.textLight,
+  },
+  hazardPopupAddress: {
+    fontSize: 14,
+    color: colors.textLight,
+    marginBottom: 8,
+  },
+  reportedByContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  reporterProfilePic: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  reportedByText: {
     fontSize: 14,
     color: colors.textLight,
   },

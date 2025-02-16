@@ -83,7 +83,7 @@ export const login = async (username, password) => {
 
 export const reportHazard = async (hazardData) => {
   try {
-    const token = await getAuthToken()
+    const token = await AsyncStorage.getItem("userToken")
     const response = await fetch(`${API_URL}/hazards`, {
       method: "POST",
       headers: {
@@ -107,24 +107,24 @@ export const reportHazard = async (hazardData) => {
 
 export const fetchHazards = async () => {
   try {
-    const token = await getAuthToken()
+    const token = await AsyncStorage.getItem("userToken")
     const response = await fetch(`${API_URL}/hazards`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
-
     if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || "Failed to fetch hazards")
+      throw new Error("Failed to fetch hazards")
     }
-
-    return await response.json()
+    const hazards = await response.json()
+    console.log("Fetched hazards:", hazards) // Add this line for debugging
+    return hazards
   } catch (error) {
     console.error("Error fetching hazards:", error)
     throw error
   }
 }
+
 
 export const fetchNotifications = async () => {
   try {
@@ -145,4 +145,69 @@ export const fetchNotifications = async () => {
     console.error("Error fetching notifications:", error)
     throw error
   }
+}
+
+export const updateProfilePicture = async (formData) => {
+  try {
+    const token = await AsyncStorage.getItem("userToken")
+    console.log("API_URL:", API_URL)
+    const requestUrl = `${API_URL}/users/profile-picture`
+    console.log("Full request URL:", requestUrl)
+    console.log("Updating profile picture. Token:", token)
+    console.log("FormData:", formData)
+
+    const response = await fetch(requestUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    })
+
+    console.log("Response status:", response.status)
+    console.log("Response headers:", JSON.stringify(response.headers))
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error("Error response:", errorText)
+      throw new Error(`Failed to update profile picture: ${response.status} ${errorText}`)
+    }
+
+    const data = await response.json()
+    console.log("Profile picture update successful:", data)
+    return data
+  } catch (error) {
+    console.error("Error updating profile picture:", error)
+    console.error("Error stack:", error.stack)
+    throw error
+  }
+}
+
+export const fetchUserProfile = async () => {
+  const token = await AsyncStorage.getItem("userToken")
+  const response = await fetch(`${API_URL}/users/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  if (!response.ok) {
+    throw new Error("Failed to fetch user profile")
+  }
+  return response.json()
+}
+
+export const updateUserProfile = async (profileData) => {
+  const token = await AsyncStorage.getItem("userToken")
+  const response = await fetch(`${API_URL}/users/profile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(profileData),
+  })
+  if (!response.ok) {
+    throw new Error("Failed to update user profile")
+  }
+  return response.json()
 }
